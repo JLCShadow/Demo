@@ -19,14 +19,14 @@ class CollectData:
 		self.outPath = os.path.realpath('/home/xxxxx/mab_results/')
 
 	def collect_result(self, jobIDs , max_trial = 20, interval = 60):
-		print "get results from pond"
+		print "get results from base"
 		try:
-			pond.wait_until_jobs_complete( self.user, self.token, jobIDs , max_trial, interval )
+			base.wait_until_jobs_complete( self.user, self.token, jobIDs , max_trial, interval )
 		except IOError:
 			raise
 		## Download results to disk
 		for jobID in jobIDs:
-			pond.get_results(self.user, self.token, jobID, self.outPath)
+			base.get_results(self.user, self.token, jobID, self.outPath)
 
 	# For win ratios of seeds
 	# dt0, dt1: all games between start and end dates (not limit on starting cohorts)
@@ -34,11 +34,11 @@ class CollectData:
 	def collect_news_summary(self, dt, numDays, environment):
 		print "collect_news_summary(): %s" % (dt)
 		## Submit Query
-		jobIDs = [] # the jobs to add partitions in Pond.pond
+		jobIDs = [] # the jobs to add partitions in Base
 		queryName = 'news_summary_%s_%s_%s' % (dt.strftime('%Y-%m-%d'), str(unmDays), environment)
 		query = sql.q_news_summary(condi_generator(dt, numDays), environment)
 		print query
-		jobID = pond.submit_query(self.user, self.token, query, queryName)
+		jobID = base.submit_query(self.user, self.token, query, queryName)
 		jobIDs.append(jobID)
 		## Wait for those Query to be complete
 		self.collect_result(jobIDs, max_trial = 200, interval = 60)
