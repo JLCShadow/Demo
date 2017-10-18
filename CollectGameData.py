@@ -56,25 +56,23 @@ def condi_generator(dt, numDays):
 def q_news_summary(condi, environment):
 	query = """
 SELECT t.title_id AS title_id,
-	   t.status AS status
-	   t.dt
+       t.status AS status
+       t.dt AS dt
 FROM (
   SELECT title_id,
-			 SUM(cnt) AS total_cnt,
-			 status,
-			 dt
-	  FROM (SELECT title_id,
-				   GET_JSON_OBJECT(event_params,'$.count') AS cnt,
-				   GET_JSON_OBJECT(event_params,'$.status') AS status
-			FROM pin.r_events
-			WHERE %s
-			AND   GET_JSON_OBJECT(event_params,'$.environment') = '%s'
-		   ) p
-	  WHERE item_type IS NOT NULL
-	  AND   item_name IS NOT NULL
-	  GROUP BY title_id,
-			   status,
-			   dt) t
+	 SUM(cnt) AS total_cnt,
+	 status,
+	 dt
+  FROM (SELECT title_id,
+	       GET_JSON_OBJECT(params,'$.count') AS cnt,
+	       GET_JSON_OBJECT(params,'$.status') AS status
+	       FROM records
+	       WHERE %s AND GET_JSON_OBJECT(params,'$.environment') = '%s') p
+  WHERE item_type IS NOT NULL
+  AND   item_name IS NOT NULL
+  GROUP BY title_id,
+	   status,
+	   dt) t
 
   """ % (condi, environment)
 	return query
